@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/PollingContract.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\r\npragma solidity 0.8.18;\r\n\r\ncontract PollingContract {\r\n    struct Poll {\r\n        uint id;\r\n        string topic;\r\n        string[] options;\r\n        uint256[] votes;\r\n        address[] voters;\r\n        uint256 timestamp;\r\n    }\r\n\r\n    uint256 public _pollId;\r\n\r\n    mapping(uint => Poll) public polls;\r\n\r\n    function CreatePoll(string memory _topic, string[] memory _options)\r\n        public\r\n        returns (Poll memory)\r\n    {\r\n        require(\r\n            bytes(_topic).length > 0 && _options.length > 0,\r\n            \"Incomplete parameters\"\r\n        );\r\n        ++_pollId;\r\n        address[] memory voters;\r\n        polls[_pollId] = Poll({\r\n            id: _pollId,\r\n            topic: _topic,\r\n            timestamp: block.timestamp,\r\n            options: _options,\r\n            votes: new uint256[](_options.length),\r\n            voters: voters\r\n        });\r\n        return polls[_pollId];\r\n    }\r\n\r\n    function getPoll(uint256 pollId) public view returns (Poll memory poll) {\r\n        return polls[pollId];\r\n    }\r\n\r\n    function vote(uint256 pollId, uint256 optionIndex)\r\n        public\r\n        returns (uint256)\r\n    {\r\n        require(!hasVoted(pollId), \"You have voted already\");\r\n        polls[pollId].votes[optionIndex] += 1;\r\n        polls[pollId].voters.push(msg.sender);\r\n        return polls[pollId].votes[optionIndex];\r\n    }\r\n\r\n    function hasVoted(uint256 pollId) public view returns (bool) {\r\n        if (polls[pollId].voters.length == 0) {\r\n            return false;\r\n        }\r\n        for (uint i = 0; i <= _pollId; i++) {\r\n            if (msg.sender == polls[pollId].voters[i]) {\r\n                return true;\r\n            }\r\n        }\r\n        return false;\r\n    }\r\n}\r\n\r\n// 1. create Poll struct\r\n// 2.create poll mapping(to retrieve polls for voting)\r\n// 3.create addPoll function: take topic and options as calldata, store topic, options and id in polls\r\n// mapping to represent the created poll.\r\n// 4.for votes in Poll struct instantiate new uint256 array with length options.length\r\n// 5.Create relationship between options and votes array(they should have the same index)\r\n// 6. To vote increase value on the votes array correlating(same index) with the option array\r\n\r\n//checks\r\n//empty parameters\r\n//voting twice\r\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
